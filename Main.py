@@ -48,6 +48,6 @@ async def checkout(ctx):
 
 
 
-os.getenv('DISCORD_TOKEN')
+DISCORDTOKEN = ''
 
 client.run(DISCORDTOKEN)
