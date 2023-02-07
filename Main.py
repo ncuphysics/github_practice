@@ -47,7 +47,7 @@ async def checkout(ctx):
         await ctx.respond(f"No check in record!!")
 
 
-DISCORDTOKEN =   'MTA3MTQ0MzU3NjgwMzgxOTUyMA.Gm_Lqw.zxYHWb9S4-kYowINjX3gHci0CwrtR3o2pYgNJo'
-#os.getenv('DISCORD_TOKEN')
+
+os.getenv('DISCORD_TOKEN')
 
 client.run(DISCORDTOKEN)
