@@ -90,6 +90,6 @@ async def record(ctx):
 
 
 
-DISCORDTOKEN = 'MTA3MTQ0MzU3NjgwMzgxOTUyMA.G6viIU.4Q5QnwPkcvS62dFmPVNZzr_67P1e9JjuRnrRUg'
+DISCORDTOKEN = ''
 
 client.run(DISCORDTOKEN)
