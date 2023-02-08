@@ -7,6 +7,8 @@ import OrderDrink   as my_od
 import Record       as my_rd
 import User         as my_Us
 
+
+
 import discord
 import time
 import os
@@ -115,9 +117,4 @@ async def help(ctx):
     await ctx.send(embed=embed)
 
 
-
-DISCORDTOKEN = ''
-
-
-
-client.run(DISCORDTOKEN)
+client.run(os.environ.get('DISCORD_TOKEN'))
