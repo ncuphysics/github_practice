@@ -116,7 +116,7 @@ async def help(ctx):
 
 
 
-DISCORDTOKEN = 'MTA3MTQ0MzU3NjgwMzgxOTUyMA.GFU0x0.ulgLDgJVYCIRpF4CSYiRnfI5-MtmhdXFpJcPjA'
+DISCORDTOKEN = '.GFU0x0.ulgLDgJVYCIRpF4CSYiRnfI5-MtmhdXFpJcPjA'
 
 
 
