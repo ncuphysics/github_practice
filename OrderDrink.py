@@ -6,6 +6,9 @@ import asyncio
 import discord
 import time
 
+
+
+## Modal after button pushed
 class Drink_modal(discord.ui.Modal):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -22,6 +25,9 @@ class Drink_modal(discord.ui.Modal):
         await interaction.response.send_message(content='You have successfully order your drink, please check your message', ephemeral=True)
 
 
+
+
+## button for order drink
 class OrderDrink(discord.ui.View):
 
     async def on_timeout(self):

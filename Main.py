@@ -1,9 +1,11 @@
 from discord.commands     import Option
 from discord.ext          import commands
-from OrderDrink           import *
 from datetime             import datetime
 from pathlib              import Path
-from User                 import *
+
+import OrderDrink   as my_od
+import Record       as my_rd
+import User         as my_Us
 
 import discord
 import time
@@ -18,7 +20,11 @@ import os
 testing_guild = [597757976920588288, 1071431018701144165]
 client = commands.Bot()
 
-User_dict = {}  ##   {userid : userclass }
+User_dict   = {}  ##   {userid : userclass }k
+connections = {}
+
+RECORD_FOLDER = "recorded"
+os.makedirs(RECORD_FOLDER, exist_ok=True)
 
 print("Start server")
 
@@ -30,7 +36,7 @@ async def on_ready():
 @client.slash_command(name="checkin",description="check in",guild_ids=testing_guild)
 async def checkin(ctx): 
     print(f'[*] {ctx.author.name} try to check in')
-    if (ctx.author.id not in User_dict):User_dict[ctx.author.id] = User(ctx.author)
+    if (ctx.author.id not in User_dict):User_dict[ctx.author.id] = my_Us.User(ctx.author)
 
     if (await User_dict[ctx.author.id].checkin()):
         await ctx.respond(f"{ ctx.author.name} check_in !")
@@ -42,7 +48,7 @@ async def checkin(ctx):
 @client.slash_command(name="checkout",description="check out",guild_ids=testing_guild)
 async def checkout(ctx): 
     print(f'[*] {ctx.author.name} try to check out')
-    if (ctx.author.id not in User_dict):User_dict[ctx.author.id] = User(ctx.author)
+    if (ctx.author.id not in User_dict):User_dict[ctx.author.id] = my_Us.User(ctx.author)
 
     if (await User_dict[ctx.author.id].checkout()):
         await ctx.respond(f"{ ctx.author.name} check out !")
@@ -56,10 +62,34 @@ async def order_drink(ctx,  timeout: Option(int, "Time out (must be a integer)",
     with open("menu.png", "rb") as fh:
         f = discord.File(fh, filename='menu.png')
     await ctx.send(file=f)
+
     print(f"[*] {ctx.author.name} initialize a drink order with timeout :",timeout )
-    await ctx.response.send_message(f"@everyone!!  {ctx.author.mention} open a drink order", view=OrderDrink(timeout=timeout))
+    await ctx.response.send_message(f"@everyone!!  {ctx.author.mention} open a drink order", view=my_od.OrderDrink(timeout=timeout))
 
 
-DISCORDTOKEN = ''
+@client.slash_command(name="record",description="Start a record",guild_ids=testing_guild)
+async def record(ctx):
+
+
+    voice = ctx.author.voice
+    if not voice:
+        await ctx.respond("You aren't in a voice channel!")
+        return
+    vc = await voice.channel.connect()
+    connections.update({ctx.guild.id: vc})
+
+    SRS = my_rd()
+
+    vc.start_recording(
+        discord.sinks.WaveSink(),  # The sink type to use.
+        SRS.once_done,  # What to do once done.
+        ctx.channel  # The channel to disconnect from.
+    )
+
+    await ctx.respond("====== Start recording ====== :speaking_head: :speech_balloon:\n",view=my_rd.StopRecordButton(voice_channel=vc,text_channel=ctx.channel,timeout=None))
+
+
+
+DISCORDTOKEN = 'MTA3MTQ0MzU3NjgwMzgxOTUyMA.G6viIU.4Q5QnwPkcvS62dFmPVNZzr_67P1e9JjuRnrRUg'
 
 client.run(DISCORDTOKEN)
