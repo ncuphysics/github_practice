@@ -21,7 +21,7 @@ testing_guild = [597757976920588288, 1071431018701144165]
 client = commands.Bot()
 
 User_dict   = {}  ##   {userid : userclass }k
-connections = {}
+orders      = {}
 
 RECORD_FOLDER = "recorded"
 os.makedirs(RECORD_FOLDER, exist_ok=True)
@@ -56,32 +56,44 @@ async def checkout(ctx):
         await ctx.respond(f"No check in record!!")
 
 
-@client.slash_command(name="order_drink",description="Order a drink",guild_ids=testing_guild)
-async def order_drink(ctx,  timeout: Option(int, "Time out (must be a integer)", required = False, default =None)):
+@client.slash_command(name="order_drink",description="Order a drink (default 5 minute time out)",guild_ids=testing_guild)
+async def order_drink(ctx,  timeout_min: Option(int, "Time out (s)", required = False, default = 5)):
     await ctx.send('======= Menu =======')
     with open("menu.png", "rb") as fh:
         f = discord.File(fh, filename='menu.png')
     await ctx.send(file=f)
 
-    print(f"[*] {ctx.author.name} initialize a drink order with timeout :",timeout )
-    await ctx.response.send_message(f"@everyone!!  {ctx.author.mention} open a drink order", view=my_od.OrderDrink(timeout=timeout))
+    print(f"[*] {ctx.author.name} initialize a drink order with timeout :",timeout_min )
+    this_order = my_od.OrderDrink(author = ctx.author, timeout=timeout_min*60)
+    orders[ctx.author.id] = this_order
+
+    await ctx.response.send_message(f"{ctx.author.mention} :exclamation: You can use a :stop_button: /stop_order_drink :stop_button:  command to close the order anytime you want.", ephemeral=True)
+    await ctx.send(f"@everyone!!  {ctx.author.mention} open a drink order", view=this_order)
+
+
+@client.slash_command(name="stop_order_drink",description="Stop the drink order",guild_ids=testing_guild)
+async def stop_order_drink(ctx):
+    if (ctx.author.id not in orders):
+        await ctx.response.send_message('You didn\'t open any drink order',ephemeral=True)
+    await orders[ctx.author.id].on_timeout()
+    await ctx.response.send_message(f"You have stop the order", ephemeral=True)
+
 
 
 @client.slash_command(name="record",description="Start a record",guild_ids=testing_guild)
 async def record(ctx):
-
-
     voice = ctx.author.voice
     if not voice:
         await ctx.respond("You aren't in a voice channel!")
         return
     vc = await voice.channel.connect()
-    connections.update({ctx.guild.id: vc})
+    # connections.update({ctx.guild.id: vc})
 
-    SRS = my_rd()
+    SRS = my_rd.StopRecordSave(os.path.join(RECORD_FOLDER,str(ctx.guild.id)))
 
     vc.start_recording(
         discord.sinks.WaveSink(),  # The sink type to use.
+        # discord.Sink(encoding='wav', filters={'time': 0}),
         SRS.once_done,  # What to do once done.
         ctx.channel  # The channel to disconnect from.
     )
@@ -90,6 +102,22 @@ async def record(ctx):
 
 
 
-DISCORDTOKEN = ''
+@client.slash_command(name="help",description="Shows help for the bot",guild_ids=testing_guild)
+async def help(ctx):
+
+    embed = discord.Embed( title="你的飲料", description="I'm a bot that could help you to works with your teams")
+
+    embed.add_field(name= "checkin"     , value="Check in"                 , inline=True)
+    embed.add_field(name= "checkout"    , value="Check out"                , inline=True)
+    embed.add_field(name= "order_drink" , value="Create a drink order"                  )
+    embed.add_field(name= "record"      , value="record yor meeting sound"              )
+
+    await ctx.send(embed=embed)
+
+
+
+DISCORDTOKEN = 'MTA3MTQ0MzU3NjgwMzgxOTUyMA.GFU0x0.ulgLDgJVYCIRpF4CSYiRnfI5-MtmhdXFpJcPjA'
+
+
 
 client.run(DISCORDTOKEN)
