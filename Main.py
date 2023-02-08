@@ -1,6 +1,7 @@
+from discord.commands     import Option
 from discord.ext          import commands
+from OrderDrink           import *
 from datetime             import datetime
-
 from pathlib              import Path
 from User                 import *
 
@@ -19,11 +20,7 @@ client = commands.Bot()
 
 User_dict = {}  ##   {userid : userclass }
 
-
-# tree = app_commands.CommandTree(client)
-
 print("Start server")
-
 
 @client.event
 async def on_ready():
@@ -54,21 +51,13 @@ async def checkout(ctx):
 
 
 @client.slash_command(name="order_drink",description="Order a drink",guild_ids=testing_guild)
-async def order_drink(ctx):
-
-    await ctx.send('Menu of drinks')
+async def order_drink(ctx,  timeout: Option(int, "Time out (must be a integer)", required = False, default =None)):
+    await ctx.send('======= Menu =======')
     with open("menu.png", "rb") as fh:
         f = discord.File(fh, filename='menu.png')
     await ctx.send(file=f)
-
-
-    OTOM = OrderTimeOutModal(title='Time for everyone to order drinks')
-    await ctx.response.send_modal(OTOM)
-    print(f"[*] {ctx.author.name} initialize a drink order with timeout :",OTOM.timeout )
-
-    # timeout=OTOM.OrderTimeOutModal
-    # print("[*] Finished")
-    # await ctx.send("Press the button!", view=MyView())
+    print(f"[*] {ctx.author.name} initialize a drink order with timeout :",timeout )
+    await ctx.response.send_message(f"@everyone!!  {ctx.author.mention} open a drink order", view=OrderDrink(timeout=timeout))
 
 
 DISCORDTOKEN = ''
