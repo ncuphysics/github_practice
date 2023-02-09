@@ -24,13 +24,14 @@ class Drink_modal(discord.ui.Modal):
         if  (not self.children[2].value.isnumeric()):
             await interaction.response.send_message(content=':no_entry_sign: Error : The price should be a number !!!', ephemeral=True)
             return
+
+
         embed = discord.Embed(title="你的飲料 :tropical_drink: ")
         embed.add_field(name="飲料"   , value=self.children[0].value)
         embed.add_field(name="客製化" , value=self.children[1].value)
         embed.add_field(name="價格" , value=self.children[2].value)
 
         self.all_drinks.append([interaction.user.name,self.children[0].value, self.children[1].value,int(self.children[2].value)])
-
         self.total_price += eval(self.children[2].value)
 
         await interaction.user.send(embeds=[embed]) # 思訓 

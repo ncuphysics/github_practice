@@ -9,6 +9,7 @@ import User         as my_Us # my class
 
 import discord
 import time
+import glob
 import os
 
 # pip install py-cord
@@ -20,8 +21,10 @@ User_dict   = {}  ##   {userid : userclass }k
 orders      = {}
 teams       = {}
 
-RECORD_FOLDER = "recorded"
-os.makedirs(RECORD_FOLDER, exist_ok=True)
+PRIVATE_RECORD_FOLDER = "private_recorded"
+PUBLIC_RECORD_FOLDER = "public_recorded"
+os.makedirs(PRIVATE_RECORD_FOLDER, exist_ok=True)
+os.makedirs(PUBLIC_RECORD_FOLDER , exist_ok=True)
 
 TEAM_FILE_NAME = "teams.json"
 
@@ -87,9 +90,8 @@ async def stop_order_drink(ctx):
     del orders[ctx.author.id]
 
 
-
-@client.slash_command(name="record",description="Start a record",guild_ids=testing_guild)
-async def record(ctx):
+@client.slash_command(name="public_record",description="Start a public record",guild_ids=testing_guild)
+async def public_record(ctx, name: Option(str, "The name of meeting", required = False, default = None)):
     voice = ctx.author.voice
     if not voice:
         await ctx.respond("You aren't in a voice channel!")
@@ -97,7 +99,7 @@ async def record(ctx):
     vc = await voice.channel.connect()
     # connections.update({ctx.guild.id: vc})
 
-    SRS = my_rd.StopRecordSave(os.path.join(RECORD_FOLDER,str(ctx.guild.id)))
+    SRS = my_rd.StopRecordSave(os.path.join(PUBLIC_RECORD_FOLDER,str(ctx.guild.id)),name)
 
     vc.start_recording(
         discord.sinks.WaveSink(),  # The sink type to use.
@@ -106,7 +108,65 @@ async def record(ctx):
         ctx.channel  # The channel to disconnect from.
     )
 
-    await ctx.respond("====== Start recording ====== :speaking_head: :speech_balloon:\n",view=my_rd.StopRecordButton(voice_channel=vc,text_channel=ctx.channel,timeout=None))
+    await ctx.respond("====== Start a public recording ====== :speaking_head: :speech_balloon:\n",view=my_rd.StopRecordButton(voice_channel=vc,text_channel=ctx.channel,timeout=None))
+
+@client.slash_command(name="private_record",description="Start a private record",guild_ids=testing_guild)
+async def private_record(ctx, name: Option(str, "The name of meeting", required = False, default = None)):
+    voice = ctx.author.voice
+    if not voice:
+        await ctx.respond("You aren't in a voice channel!")
+        return
+    vc = await voice.channel.connect()
+    # connections.update({ctx.guild.id: vc})
+
+    SRS = my_rd.StopRecordSave(os.path.join(PRIVATE_RECORD_FOLDER,str(ctx.guild.id)), name)
+
+    vc.start_recording(
+        discord.sinks.WaveSink(),  # The sink type to use.
+        # discord.Sink(encoding='wav', filters={'time': 0}),
+        SRS.once_done,  # What to do once done.
+        ctx.channel  # The channel to disconnect from.
+    )
+
+    await ctx.respond("====== Start a private recording ====== :speaking_head: :speech_balloon:\n",view=my_rd.StopRecordButton(voice_channel=vc,text_channel=ctx.channel,timeout=None))
+
+@client.slash_command(name="check_record",description="Chek summarize record",guild_ids=testing_guild)
+async def check_record(ctx):
+    guild_id = str(ctx.guild.id)
+    user_id  = ctx.author.id
+
+
+    private_folders  = os.path.join(PRIVATE_RECORD_FOLDER,guild_id )
+    public_folders   = os.path.join(PUBLIC_RECORD_FOLDER,guild_id  )
+
+    availble_time         = []
+    corresponding_folders = []
+
+    if os.path.isdir(public_folders): 
+        availble_time = os.listdir(public_folders)
+        corresponding_folders = [os.path.join(public_folders,i) for i in availble_time]
+
+
+    if os.path.isdir(private_folders): 
+        # find avalible private
+        for each_private_time in os.listdir(private_folders):
+            this_time_folder = os.path.join(private_folders,each_private_time)
+            if (f'{user_id}.wav' in os.listdir(this_time_folder)):
+                availble_time.append(each_private_time)
+                corresponding_folders.append(this_time_folder)
+
+    
+
+    if (len(availble_time) == 0):
+        await ctx.respond("you haven't recorded any audio")
+        return
+
+    CRM = my_rd.CheckRecordMenu(availble_time, corresponding_folders)
+    
+
+    await ctx.respond("Choose a record!   🟢:Public    🔴:Private", view=CRM.view, ephemeral=True)
+    # await ctx.respond("====== check_record ======")
+
 
 
 # 訂會議室
@@ -230,8 +290,9 @@ async def help(ctx):
 \t\t-In the end you will receive all the drinks entered by the user
 
 :speaking_head: **RECORD**
-\t\t-You can record your meeting sound.
-\t\t-You can get the summarize of the meeting.
+\t\tYou can record your meeting sound, and get the summarize of the meeting.
+\t\t-private_record : The  summary is can only be retrieved by the recorded person.
+\t\t-public_record : The summary is available to everyone.
 
 :office_worker: **CHECKIN_RECORD**
 \t\t-The team leader can check the team member check in-out record.
@@ -245,4 +306,6 @@ async def help(ctx):
     await ctx.send(text)
 
 
-client.run(os.getenv('DISCORD_TOKEN'))
+# client.run(os.getenv('DISCORD_TOKEN'))
+
+client.run('')
