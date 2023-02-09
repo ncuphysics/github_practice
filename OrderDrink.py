@@ -33,7 +33,7 @@ class Drink_modal(discord.ui.Modal):
 
         self.total_price += eval(self.children[2].value)
 
-        await interaction.user.send(embeds=[embed])
+        await interaction.user.send(embeds=[embed]) # 思訓 
         await interaction.response.send_message(content=':white_check_mark:  You have successfully order your drink :tropical_drink: , please check your message', ephemeral=True)
 
 

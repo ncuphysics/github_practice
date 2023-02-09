@@ -104,17 +104,6 @@ async def speech_to_text(path):
     return whole_text
 
 
-    # with sound as source:
-    #     # r.adjust_for_ambient_noise(source, duration=0.5)
-    #     # r.adjust_for_ambient_noise(source)
-    #     audio = r.record(source)
-
-    # return r.recognize_google(audio,language ='zh-tw')
-    # print(r.recognize_google(audio, show_all=True))
-    
-
-
-
 
 
 

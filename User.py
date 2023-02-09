@@ -24,6 +24,7 @@ class User:
             self.__check_ou_record.append(this_check_time)
             await self.user_ctx.send("you check out at "+ this_check_time.strftime("%m-%d %X"))
             return True
+            
     async def checkin(self):
 
         ## forget check out
