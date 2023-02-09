@@ -246,4 +246,4 @@ async def help(ctx):
     await ctx.send(text)
 
 
-client.run('MTA3MTQ0MzU3NjgwMzgxOTUyMA.Gqahr6.rGVILocv83I6UBI-xENbgkgZnul9eI4LSsFSMM')
+client.run('')
