@@ -190,7 +190,7 @@ def speech_to_text(path):
 
 
 class CheckRecordMenu():
-    def __init__(self, time_arr, folder_arr, *args, **kwargs):
+    def __init__(self, time_arr, folder_arr, isfile=True, *args, **kwargs):
 
         self.label_arr, discrip_arr, emoji_arr =  self.get_record_time(time_arr, folder_arr)
         options = [ discord.SelectOption(label=self.label_arr[i],description=discrip_arr[i],emoji = emoji_arr[i])for i in range(len(time_arr))]
@@ -203,7 +203,10 @@ class CheckRecordMenu():
             max_values  = 1,
             options = options
             )
-        self.select.callback = self.callback
+        if (not isfile):
+            self.select.callback = self.callback
+        else:
+            self.select.callback = self.callback2
         self.view = discord.ui.View()
         self.view.add_item(self.select)
 
@@ -216,6 +219,7 @@ class CheckRecordMenu():
 
 
     def get_record_time(self,time_arr, folder_arr):
+        self.start_arr, self.end_arr = [], []
         label_arr, discrip_arr, emoji_arr = [], [], []
         public_index, private_index = 1,1
 
@@ -242,12 +246,32 @@ class CheckRecordMenu():
             start_time = datetime.strptime(start,'%y-%m-%d-%H-%M-%S')
             end_time   = datetime.strptime(end  ,'%y-%m-%d-%H-%M-%S')
 
+            self.start_arr.append(start_time.strftime('%Y-%m-%d  %H:%M:%S'))
+            self.end_arr.append(end_time.strftime('%Y-%m-%d  %H:%M:%S'))
+
             total_time = (end_time-start_time).total_seconds()
             
             discrip_arr.append(f"Start from {start_time.strftime('%Y-%m-%d  %H:%M:%S')} ({total_time}s)")
         return label_arr, discrip_arr, emoji_arr
 
+    async def callback2(self, interaction):
+        which_chosen = self.label_arr.index(self.select.values[0])
+        # print(which_chosen)
+        all_wav_files  = glob.glob(self.folder_arr[which_chosen]+"/*.wav")
+        recorded_users = []
+        user_id_arr    = []
+        for all_wav in all_wav_files:
+            this_file = os.path.basename(all_wav)[:-4]
+            recorded_users.append(f'<@{this_file}>')
+            user_id_arr.append(this_file)
+            await interaction.channel.send(f'<@{this_file}>', file=discord.File(all_wav))
 
+            
+        if (len(user_id_arr)==1):
+            await interaction.response.send_message(f"This recording is from {self.start_arr[which_chosen]} to {self.end_arr[which_chosen]}, only {len(user_id_arr)} people participated")
+
+        else:
+            await interaction.response.send_message(f"This recording is from {self.start_arr[which_chosen]} to {self.end_arr[which_chosen]}, a total of {len(user_id_arr)} people participated")
 
     async def callback(self, interaction):
         which_chosen = self.label_arr.index(self.select.values[0])

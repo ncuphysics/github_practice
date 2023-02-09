@@ -81,6 +81,9 @@ async def order_drink(ctx,  timeout_min: Option(int, "Time out (min)", required 
     await ctx.send(f"@everyone!!  {ctx.author.mention} open a drink order", view=this_order)
 
 
+
+############################################################ Record ############################################################
+
 @client.slash_command(name="stop_order_drink",description="Stop the drink order",guild_ids=testing_guild)
 async def stop_order_drink(ctx):
     if (ctx.author.id not in orders):
@@ -130,8 +133,8 @@ async def private_record(ctx, name: Option(str, "The name of meeting", required 
 
     await ctx.respond("====== Start a private recording ====== :speaking_head: :speech_balloon:\n",view=my_rd.StopRecordButton(voice_channel=vc,text_channel=ctx.channel,timeout=None))
 
-@client.slash_command(name="check_record",description="Chek summarize record",guild_ids=testing_guild)
-async def check_record(ctx):
+@client.slash_command(name="check_record_summary",description="Check summarized record",guild_ids=testing_guild)
+async def check_record_summary(ctx):
     guild_id = str(ctx.guild.id)
     user_id  = ctx.author.id
 
@@ -168,9 +171,48 @@ async def check_record(ctx):
     # await ctx.respond("====== check_record ======")
 
 
+@client.slash_command(name="check_record_file",description="Check record file",guild_ids=testing_guild)
+async def check_record_file(ctx):
+    guild_id = str(ctx.guild.id)
+    user_id  = ctx.author.id
+
+
+    private_folders  = os.path.join(PRIVATE_RECORD_FOLDER,guild_id )
+    public_folders   = os.path.join(PUBLIC_RECORD_FOLDER,guild_id  )
+
+    availble_time         = []
+    corresponding_folders = []
+
+    if os.path.isdir(public_folders): 
+        availble_time = os.listdir(public_folders)
+        corresponding_folders = [os.path.join(public_folders,i) for i in availble_time]
+
+
+    if os.path.isdir(private_folders): 
+        # find avalible private
+        for each_private_time in os.listdir(private_folders):
+            this_time_folder = os.path.join(private_folders,each_private_time)
+            if (f'{user_id}.wav' in os.listdir(this_time_folder)):
+                availble_time.append(each_private_time)
+                corresponding_folders.append(this_time_folder)
+
+    
+
+    if (len(availble_time) == 0):
+        await ctx.respond("you haven't recorded any audio")
+        return
+
+    CRM = my_rd.CheckRecordMenu(availble_time, corresponding_folders)
+    
+
+    await ctx.respond("Choose a record!   🟢:Public    🔴:Private", view=CRM.view, ephemeral=True)
+
+
+#######################################################################################################################
+
 
 # 訂會議室
-@client.slash_command(name="book_meeting",description="Get users checkin record",guild_ids=testing_guild)
+@client.slash_command(name="book_meeting",description="Let user book a meeting",guild_ids=testing_guild)
 async def book_meeting(ctx):
     
     ## check if user is a team leader, set a alarm to user
@@ -180,7 +222,7 @@ async def book_meeting(ctx):
     await ctx.respond("====== BookMeeting ======")
 
 
-############### team ############################################################
+##################################################### Team ############################################################
 
 
 # 開始一個 team
@@ -194,8 +236,8 @@ async def create_team(ctx,  team_name: Option(str, "The team name", required = T
     await ctx.respond("====== Create team ======")
 
 # 看check in out 紀錄
-@client.slash_command(name="checkin_record",description="Get users checkin record",guild_ids=testing_guild)
-async def checkin_record(ctx):
+@client.slash_command(name="get_checkinout",description="Get users checkin",guild_ids=testing_guild)
+async def get_checkinout(ctx):
     ## check if user is any team leader
     ## choose each team
 
@@ -204,7 +246,7 @@ async def checkin_record(ctx):
 
 
 # 分派工作
-@client.slash_command(name="teamwork",description="Get users checkin record",guild_ids=testing_guild)
+@client.slash_command(name="teamwork",description="Assign work to users",guild_ids=testing_guild)
 async def teamwork(ctx):
 
     ## check if user is any team leader
@@ -214,7 +256,7 @@ async def teamwork(ctx):
 
 
 # 問團隊隊員現在的任務
-@client.slash_command(name="member_current_tasks",description="Get users checkin record",guild_ids=testing_guild)
+@client.slash_command(name="member_current_tasks",description="Ask the team members about their current tasks",guild_ids=testing_guild)
 async def member_current_tasks(ctx):
 
     ## check if user is any team leader
@@ -223,7 +265,7 @@ async def member_current_tasks(ctx):
     await ctx.respond("====== member_current_tasks ======")
 
 
-@client.slash_command(name="teamkick",description="Get users checkin record",guild_ids=testing_guild)
+@client.slash_command(name="teamkick",description="kick a member off the team",guild_ids=testing_guild)
 async def teamkick(ctx):
 
     ## check if user is any team leader
@@ -234,24 +276,28 @@ async def teamkick(ctx):
 
 
 # 匿名回覆意見
-@client.slash_command(name="anonymous_opinion",description="Get users checkin record",guild_ids=testing_guild)
+@client.slash_command(name="anonymous_opinion",description="Allow members to comments anonymously",guild_ids=testing_guild)
 async def anonymous_opinion(ctx):
 
     ## check if user in any team
 
     await ctx.respond("====== anonymousopinion ======")
 
-############################################################
+#######################################################################################################################
+
+
+
+############################################################ Information ###############################################
 
 # get weather
-@client.slash_command(name="weather",description="Get users checkin record",guild_ids=testing_guild)
+@client.slash_command(name="weather",description="Weather information for each region",guild_ids=testing_guild)
 async def weather(ctx):
     await ctx.respond("====== weather ======")
 
 
 
 # get stock
-@client.slash_command(name="stock",description="Get users checkin record",guild_ids=testing_guild)
+@client.slash_command(name="stock",description="Get stock information",guild_ids=testing_guild)
 async def stock(ctx):
 
     
@@ -260,12 +306,14 @@ async def stock(ctx):
 
 
 # get earthquake
-@client.slash_command(name="earthquake",description="Get users checkin record",guild_ids=testing_guild)
+@client.slash_command(name="earthquake",description="Get earthquake information",guild_ids=testing_guild)
 async def earthquake(ctx):
 
     
 
     await ctx.respond("====== earthquake ======")
+
+########################################################################################################################
 
 
 
@@ -287,19 +335,25 @@ async def help(ctx):
 :champagne_glass: **ORDER DRINK**
 \t\t-You can create a drink order.
 \t\t-Other users can enter what they want to drink.
-\t\t-In the end you will receive all the drinks entered by the user
+\t\t-In the end you will receive all the drinks entered by the user.
 
 :speaking_head: **RECORD**
-\t\tYou can record your meeting sound, and get the summarize of the meeting.
-\t\t-private_record : The  summary is can only be retrieved by the recorded person.
-\t\t-public_record : The summary is available to everyone.
+\t\t-You can record your meeting sound, and get the summarize of the meeting.
+\t\t-private record       : Start a private recording, and the subsequent summary will only be available to those in the voice room (it is recommended to lock the room)
+\t\t-public record        : Open a public recording, everyone in this server can access.
+\t\t-check record summary : Can check all your accessible recordings, and call up the summary conclusion.
+\t\t-check record file    : Can check all your accessible recordings, and download the audio.
 
-:office_worker: **CHECKIN_RECORD**
+:office_worker: **get_checkinout**
 \t\t-The team leader can check the team member check in-out record.
 
-:man_teacher: **CREATETEAM**
-\t\t-You can create your own team.
-
+:man_teacher: **Team**
+\t\tYou can create your team, manage your team members, assign tasks, check in and out status.
+\t\t-get checkinout       : The team leader can check the team member check in-out record.
+\t\t-teamwork             : You can use this command to let the robot help you assign tasks to team members.
+\t\t-member current tasks : Do you find it troublesome to private message each team member? Let the robot help you ask, and I can help you ask every member under you.
+\t\t-teamkick             : Remove member.
+\t\t-anonymous_opinion    : Each member has the ability to express their opinions anonymously, which makes a team grow.
 
 
 """
