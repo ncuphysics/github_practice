@@ -110,8 +110,8 @@ async def record(ctx):
 
 
 # 訂會議室
-@client.slash_command(name="BookMeeting",description="Get users checkin record",guild_ids=testing_guild)
-async def BookMeeting(ctx):
+@client.slash_command(name="book_meeting",description="Get users checkin record",guild_ids=testing_guild)
+async def book_meeting(ctx):
     
     ## check if user is a team leader, set a alarm to user
 
@@ -126,8 +126,8 @@ async def BookMeeting(ctx):
 # 開始一個 team
 # 提供所有人加入  
 
-@client.slash_command(name="createteam",description="Create team",guild_ids=testing_guild)
-async def createteam(ctx,  team_name: Option(str, "The team name", required = True)):
+@client.slash_command(name="create_team",description="Create team",guild_ids=testing_guild)
+async def create_team(ctx,  team_name: Option(str, "The team name", required = True)):
     ## Create a team  
     ## check if teamname exist
 
@@ -174,8 +174,8 @@ async def teamkick(ctx):
 
 
 # 匿名回覆意見
-@client.slash_command(name="opinion",description="Get users checkin record",guild_ids=testing_guild)
-async def anonymousopinion(ctx):
+@client.slash_command(name="anonymous_opinion",description="Get users checkin record",guild_ids=testing_guild)
+async def anonymous_opinion(ctx):
 
     ## check if user in any team
 
@@ -236,14 +236,16 @@ async def help(ctx):
 \t\t-You can record your meeting sound.
 \t\t-You can get the summarize of the meeting.
 
+:office_worker: **CHECKIN_RECORD**
+\t\t-The team leader can check the team member check in-out record.
+
 :man_teacher: **CREATETEAM**
 \t\t-You can create your own team.
 
-:office_worker: **CHECKIN_RECORD**
-\t\t-The team leader can check the team member check in-out record.
+
 
 """
     await ctx.send(text)
 
 
-client.run('')
+client.run(os.getenv('DISCORD_TOKEN'))
