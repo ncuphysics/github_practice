@@ -1,5 +1,5 @@
 # github_practice
 
-	pip install pycord
+	pip install py-cord
 	pip install SpeechRecognition
 	pip install pyaudio

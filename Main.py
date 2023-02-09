@@ -186,9 +186,6 @@ async def anonymous_opinion(ctx):
 # get weather
 @client.slash_command(name="weather",description="Get users checkin record",guild_ids=testing_guild)
 async def weather(ctx):
-
-
-
     await ctx.respond("====== weather ======")
 
 
