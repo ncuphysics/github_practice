@@ -12,7 +12,7 @@ import time
 import glob
 import os
 
-# pip install py-cord
+# pip install py-cord   
 
 testing_guild = [597757976920588288, 1071431018701144165]
 client = commands.Bot()
@@ -164,7 +164,7 @@ async def check_record_summary(ctx):
         await ctx.respond("you haven't recorded any audio")
         return
 
-    CRM = my_rd.CheckRecordMenu(availble_time, corresponding_folders)
+    CRM = my_rd.CheckRecordMenu(availble_time, corresponding_folders,False)
     
 
     await ctx.respond("Choose a record!   🟢:Public    🔴:Private", view=CRM.view, ephemeral=True)
@@ -211,15 +211,6 @@ async def check_record_file(ctx):
 #######################################################################################################################
 
 
-# 訂會議室
-@client.slash_command(name="book_meeting",description="Let user book a meeting",guild_ids=testing_guild)
-async def book_meeting(ctx):
-    
-    ## check if user is a team leader, set a alarm to user
-
-
-
-    await ctx.respond("====== BookMeeting ======")
 
 
 ##################################################### Team ############################################################
@@ -278,10 +269,22 @@ async def teamkick(ctx):
 # 匿名回覆意見
 @client.slash_command(name="anonymous_opinion",description="Allow members to comments anonymously",guild_ids=testing_guild)
 async def anonymous_opinion(ctx):
-
+    ctx.author.se
     ## check if user in any team
 
     await ctx.respond("====== anonymousopinion ======")
+
+
+# 訂會議室
+@client.slash_command(name="book_meeting",description="Let user book a meeting",guild_ids=testing_guild)
+async def book_meeting(ctx):
+    
+    ## check if user is a team leader, set a alarm to user
+
+
+
+    await ctx.respond("====== BookMeeting ======")
+
 
 #######################################################################################################################
 
